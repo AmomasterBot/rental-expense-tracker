@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiUpload } from 'react-icons/fi';
 import ExpenseForm from '../components/ExpenseForm';
-import '../styles/add-expense.css';
 
 function AddExpense() {
   const navigate = useNavigate();

@@ -2,32 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f9fafb;
+  }
+
+  code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+      monospace;
+  }
+
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-html, body, #root {
-  height: 100%;
-  width: 100%;
-}
-
-/* Responsive utility classes */
+/* Responsive utility classes and layout styles */
 @layer components {
   .btn-primary {
     @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium;
@@ -52,11 +54,122 @@ html, body, #root {
   .label {
     @apply block text-sm font-medium text-gray-700 mb-2;
   }
+
+  /* Layout Components */
+  .layout-container {
+    @apply flex flex-col h-screen bg-gray-50;
+  }
+
+  .layout-wrapper {
+    @apply flex flex-1 overflow-hidden;
+  }
+
+  .main-content {
+    @apply flex-1 overflow-y-auto p-4 max-w-5xl w-full mx-auto;
+  }
+
+  .offline-banner {
+    @apply bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 rounded text-yellow-900 font-medium text-center;
+  }
+
+  /* Page Containers */
+  .dashboard-container {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .dashboard-container h2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .add-expense-container {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .properties-container {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  .view-expenses-container {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  /* Table Styles */
+  table {
+    @apply w-full;
+  }
+
+  /* Scrollbar Styling */
+  .main-content {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+  }
+
+  .main-content::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  .main-content::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+
+  .main-content::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded;
+  }
+
+  .main-content::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400;
+  }
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    @apply animation-fadeIn;
+    animation: fadeIn 0.3s ease-in-out;
+  }
 }
 
 /* Mobile-first responsive design */
 @media (max-width: 768px) {
   body {
     font-size: 14px;
+  }
+
+  .layout-wrapper {
+    flex-direction: column;
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  table {
+    font-size: 0.875rem;
+  }
+
+  td, th {
+    padding: 0.75rem 0.5rem !important;
   }
 }

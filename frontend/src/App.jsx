@@ -5,7 +5,6 @@ import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import AddExpense from './pages/AddExpense';
 import ViewExpenses from './pages/ViewExpenses';
-import './App.css';
 
 function App() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);

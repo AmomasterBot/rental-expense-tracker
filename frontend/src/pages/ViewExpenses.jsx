@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FiDownload, FiTrash2, FiPlus } from 'react-icons/fi';
 import ExpenseTable from '../components/ExpenseTable';
-import '../styles/view-expenses.css';
 
 function ViewExpenses() {
   const [expenses, setExpenses] = useState([]);

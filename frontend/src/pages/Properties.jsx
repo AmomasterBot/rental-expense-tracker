@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { FiPlus, FiHome } from 'react-icons/fi';
 import PropertyCard from '../components/PropertyCard';
 import PropertyForm from '../components/PropertyForm';
-import '../styles/properties.css';
 
 function Properties() {
   const [properties, setProperties] = useState([]);

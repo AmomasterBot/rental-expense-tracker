@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { FiPlus, FiDollarSign, FiHome } from 'react-icons/fi';
 import PropertyCard from '../components/PropertyCard';
 import StatsCard from '../components/StatsCard';
-import '../styles/dashboard.css';
 
 function Dashboard() {
   const [properties, setProperties] = useState([]);

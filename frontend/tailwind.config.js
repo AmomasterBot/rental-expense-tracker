@@ -13,6 +13,29 @@ export default {
         warning: '#f59e0b',
         danger: '#ef4444',
       },
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+      },
+      keyframes: {
+        fadeIn: {
+          'from': {
+            opacity: '0',
+          },
+          'to': {
+            opacity: '1',
+          },
+        },
+        slideDown: {
+          'from': {
+            transform: 'translateY(-100%)',
+            opacity: '0',
+          },
+          'to': {
+            transform: 'translateY(0)',
+            opacity: '1',
+          },
+        },
+      },
     },
   },
   plugins: [],
