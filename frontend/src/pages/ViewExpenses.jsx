@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiDownload, FiTrash2, FiPlus } from 'react-icons/fi';
+import { FiDownload, FiPlus, FiFilter, FiX } from 'react-icons/fi';
 import ExpenseTable from '../components/ExpenseTable';
 
 function ViewExpenses() {
   const [expenses, setExpenses] = useState([]);
   const [properties, setProperties] = useState([]);
+  const [showFilters, setShowFilters] = useState(true);
   const [filters, setFilters] = useState({
     property: '',
+    provider: '',
     startDate: '',
     endDate: '',
   });
@@ -19,8 +21,12 @@ function ViewExpenses() {
     setProperties(storedProperties);
   }, []);
 
+  // Get unique providers from expenses
+  const uniqueProviders = [...new Set(expenses.map((e) => e.provider))].sort();
+
   const filteredExpenses = expenses.filter((expense) => {
     if (filters.property && expense.property !== filters.property) return false;
+    if (filters.provider && expense.provider !== filters.provider) return false;
     if (filters.startDate && new Date(expense.date) < new Date(filters.startDate))
       return false;
     if (filters.endDate && new Date(expense.date) > new Date(filters.endDate))
@@ -43,10 +49,18 @@ function ViewExpenses() {
         e.provider,
         e.amount,
         e.category,
-        e.notes,
+        e.notes || '',
       ]),
     ]
-      .map((row) => row.join(','))
+      .map((row) =>
+        row
+          .map((cell) =>
+            typeof cell === 'string' && cell.includes(',')
+              ? `"${cell}"`
+              : cell
+          )
+          .join(',')
+      )
       .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -58,79 +72,150 @@ function ViewExpenses() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleClearFilters = () => {
+    setFilters({
+      property: '',
+      provider: '',
+      startDate: '',
+      endDate: '',
+    });
+  };
+
+  const isFiltered =
+    filters.property || filters.provider || filters.startDate || filters.endDate;
+
   return (
     <div className="view-expenses-container">
-      <div className="mb-8 flex justify-between items-center flex-col sm:flex-row gap-4">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Expenses</h2>
-          <p className="text-gray-600">View and manage your expenses</p>
-        </div>
-        <div className="flex gap-2">
-          <Link to="/expenses/add" className="btn-primary flex items-center gap-2">
-            <FiPlus size={20} />
-            Add Expense
-          </Link>
-          {filteredExpenses.length > 0 && (
-            <button
-              onClick={handleExport}
-              className="btn-secondary flex items-center gap-2"
+      {/* Header */}
+      <div className="mb-6 sm:mb-8">
+        <div className="flex justify-between items-start gap-4 flex-col sm:flex-row mb-4">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
+              Expenses
+            </h2>
+            <p className="text-gray-600 text-sm">
+              View and manage your expenses
+              {filteredExpenses.length > 0 && (
+                <span className="ml-2 font-semibold text-gray-900">
+                  ({filteredExpenses.length})
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Link
+              to="/expenses/add"
+              className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-none"
             >
-              <FiDownload size={20} />
-              Export
-            </button>
-          )}
+              <FiPlus size={20} />
+              <span>Add</span>
+            </Link>
+            {filteredExpenses.length > 0 && (
+              <button
+                onClick={handleExport}
+                className="btn-secondary flex items-center justify-center gap-2 flex-1 sm:flex-none"
+              >
+                <FiDownload size={20} />
+                <span>Export</span>
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Mobile filter toggle */}
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="md:hidden flex items-center gap-2 text-blue-600 hover:text-blue-900 font-medium text-sm"
+        >
+          <FiFilter size={18} />
+          {showFilters ? 'Hide' : 'Show'} Filters
+        </button>
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900">Filters</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="label">Property</label>
-            <select
-              value={filters.property}
-              onChange={(e) =>
-                setFilters({ ...filters, property: e.target.value })
-              }
-              className="input-field"
-            >
-              <option value="">All Properties</option>
-              {properties.map((prop) => (
-                <option key={prop.id} value={prop.name}>
-                  {prop.name}
-                </option>
-              ))}
-            </select>
+      {(showFilters || window.innerWidth >= 768) && (
+        <div className="card mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+            {isFiltered && (
+              <button
+                onClick={handleClearFilters}
+                className="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                <FiX size={16} />
+                Clear All
+              </button>
+            )}
           </div>
-          <div>
-            <label className="label">Start Date</label>
-            <input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) =>
-                setFilters({ ...filters, startDate: e.target.value })
-              }
-              className="input-field"
-            />
-          </div>
-          <div>
-            <label className="label">End Date</label>
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) =>
-                setFilters({ ...filters, endDate: e.target.value })
-              }
-              className="input-field"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="label">Property</label>
+              <select
+                value={filters.property}
+                onChange={(e) =>
+                  setFilters({ ...filters, property: e.target.value })
+                }
+                className="input-field"
+              >
+                <option value="">All Properties</option>
+                {properties.map((prop) => (
+                  <option key={prop.id} value={prop.name}>
+                    {prop.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Provider</label>
+              <select
+                value={filters.provider}
+                onChange={(e) =>
+                  setFilters({ ...filters, provider: e.target.value })
+                }
+                className="input-field"
+              >
+                <option value="">All Providers</option>
+                {uniqueProviders.map((provider) => (
+                  <option key={provider} value={provider}>
+                    {provider}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Start Date</label>
+              <input
+                type="date"
+                value={filters.startDate}
+                onChange={(e) =>
+                  setFilters({ ...filters, startDate: e.target.value })
+                }
+                className="input-field"
+              />
+            </div>
+            <div>
+              <label className="label">End Date</label>
+              <input
+                type="date"
+                value={filters.endDate}
+                onChange={(e) =>
+                  setFilters({ ...filters, endDate: e.target.value })
+                }
+                className="input-field"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Expenses Table */}
       {filteredExpenses.length > 0 ? (
-        <div className="card overflow-x-auto">
+        <div className="card">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-gray-600">
+              Showing {filteredExpenses.length} of {expenses.length} expenses
+            </p>
+          </div>
           <ExpenseTable
             expenses={filteredExpenses}
             onDelete={handleDeleteExpense}
@@ -147,6 +232,14 @@ function ViewExpenses() {
             <Link to="/expenses/add" className="btn-primary inline-block">
               Add First Expense
             </Link>
+          )}
+          {expenses.length > 0 && isFiltered && (
+            <button
+              onClick={handleClearFilters}
+              className="btn-secondary inline-block mt-2"
+            >
+              Clear Filters
+            </button>
           )}
         </div>
       )}
