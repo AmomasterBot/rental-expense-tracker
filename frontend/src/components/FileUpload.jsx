@@ -238,7 +238,12 @@ function FileUpload({ onFileSelect, onError, allowedTypes = ['image/jpeg', 'imag
           <input
             ref={cameraInputRef}
             type="file"
-            accept="image/*"
+            accept={allowedTypes.filter(t => t.startsWith('image/')).map(type => {
+              if (type === 'image/jpeg') return '.jpg,.jpeg';
+              if (type === 'image/png') return '.png';
+              if (type === 'image/heic') return '.heic,.heif';
+              return '';
+            }).join(',')}
             capture="environment"
             onChange={handleFileChange}
             className="hidden"
