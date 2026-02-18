@@ -92,7 +92,7 @@ async function convertHeicToJpeg(req, res, next) {
 function handleMulterError(err, req, res, next) {
   if (err instanceof multer.MulterError) {
     if (err.code === 'FILE_TOO_LARGE') {
-      return res.status(400).json({ error: 'File size exceeds maximum limit of 10MB' });
+      return res.status(413).json({ error: 'File size exceeds maximum limit of 10MB' });
     }
     return res.status(400).json({ error: err.message });
   } else if (err) {

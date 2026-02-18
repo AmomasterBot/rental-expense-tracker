@@ -32,7 +32,7 @@ app.get('/health', (req, res) => {
 app.use('/api/properties', propertiesRouter);
 app.use('/api/expenses', expensesRouter);
 app.use('/api/files', filesRouter);
-app.post('/api/upload', filesRouter);
+app.use('/api/upload', filesRouter);
 
 // Catch-all for undefined routes
 app.use((req, res) => {
@@ -62,12 +62,12 @@ async function startServer() {
       console.log(`  - GET  /api/properties/:id`);
       console.log(`  - PUT  /api/properties/:id`);
       console.log(`  - DELETE /api/properties/:id`);
+      console.log(`  - GET  /api/properties/:id/expenses`);
       console.log(`  - GET  /api/expenses`);
       console.log(`  - POST /api/expenses`);
       console.log(`  - GET  /api/expenses/:id`);
       console.log(`  - PUT  /api/expenses/:id`);
       console.log(`  - DELETE /api/expenses/:id`);
-      console.log(`  - GET  /api/expenses/property/:property_id`);
       console.log(`  - POST /api/upload`);
       console.log(`  - GET  /api/files`);
       console.log(`  - GET  /api/files/:id`);
