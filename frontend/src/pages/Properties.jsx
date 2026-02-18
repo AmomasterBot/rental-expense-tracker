@@ -7,33 +7,75 @@ function Properties() {
   const [properties, setProperties] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const storedProperties = JSON.parse(localStorage.getItem('properties')) || [];
-    setProperties(storedProperties);
-  }, []);
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
-  const handleSaveProperty = (property) => {
-    let updatedProperties;
-
-    if (editingId) {
-      updatedProperties = properties.map((p) =>
-        p.id === editingId ? { ...property, id: editingId } : p
-      );
-      setEditingId(null);
-    } else {
-      updatedProperties = [...properties, { ...property, id: Date.now() }];
+  // Fetch properties from API
+  const fetchProperties = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/properties`);
+      if (!response.ok) throw new Error('Failed to fetch properties');
+      const data = await response.json();
+      setProperties(data.properties || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching properties:', err);
+    } finally {
+      setLoading(false);
     }
-
-    setProperties(updatedProperties);
-    localStorage.setItem('properties', JSON.stringify(updatedProperties));
-    setShowForm(false);
   };
 
-  const handleDeleteProperty = (id) => {
-    const updatedProperties = properties.filter((p) => p.id !== id);
-    setProperties(updatedProperties);
-    localStorage.setItem('properties', JSON.stringify(updatedProperties));
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const handleSaveProperty = async (property) => {
+    try {
+      if (editingId) {
+        // Update existing property
+        const response = await fetch(`${API_BASE_URL}/api/properties/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(property)
+        });
+        if (!response.ok) throw new Error('Failed to update property');
+      } else {
+        // Create new property
+        const response = await fetch(`${API_BASE_URL}/api/properties`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(property)
+        });
+        if (!response.ok) throw new Error('Failed to create property');
+      }
+      
+      // Refresh the list
+      await fetchProperties();
+      setShowForm(false);
+      setEditingId(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error saving property:', err);
+    }
+  };
+
+  const handleDeleteProperty = async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/properties/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete property');
+      
+      // Refresh the list
+      await fetchProperties();
+    } catch (err) {
+      setError(err.message);
+      console.error('Error deleting property:', err);
+    }
   };
 
   const handleEditProperty = (property) => {
@@ -83,8 +125,25 @@ function Properties() {
         </div>
       )}
 
-      {/* Properties Grid */}
-      {properties.length > 0 ? (
+      {/* Error Message */}
+      {error && (
+        <div className="card bg-red-50 border border-red-200 mb-4">
+          <p className="text-red-800">{error}</p>
+          <button
+            onClick={fetchProperties}
+            className="mt-2 text-red-600 underline hover:text-red-800"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading ? (
+        <div className="card text-center py-12">
+          <p className="text-gray-600">Loading properties...</p>
+        </div>
+      ) : properties.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((property) => (
             <PropertyCard

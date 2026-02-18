@@ -2,45 +2,61 @@ import React, { useState } from 'react';
 import { FiTrash2, FiImage, FiX } from 'react-icons/fi';
 import { formatDateShort } from '../utils/formatters';
 
-function ExpenseTable({ expenses, onDelete }) {
-  const [sortConfig, setSortConfig] = useState({
-    key: 'date',
-    direction: 'desc',
-  });
-
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
-
-  const sortedExpenses = [...expenses].sort((a, b) => {
-    const aVal = a[sortConfig.key];
-    const bVal = b[sortConfig.key];
-
-    if (typeof aVal === 'number') {
-      return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
-    }
-
-    if (sortConfig.key === 'date') {
-      const aDate = new Date(aVal);
-      const bDate = new Date(bVal);
-      return sortConfig.direction === 'asc' ? aDate - bDate : bDate - aDate;
-    }
-
-    const aStr = String(aVal).toLowerCase();
-    const bStr = String(bVal).toLowerCase();
-
-    return sortConfig.direction === 'asc'
-      ? aStr.localeCompare(bStr)
-      : bStr.localeCompare(aStr);
-  });
-
-  const handleSort = (key) => {
-    setSortConfig((prev) => ({
-      key,
-      direction:
-        prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
-    }));
+// Category color mapping
+const getCategoryColor = (category) => {
+  const colors = {
+    maintenance: 'bg-blue-100 text-blue-800',
+    repair: 'bg-red-100 text-red-800',
+    utilities: 'bg-yellow-100 text-yellow-800',
+    insurance: 'bg-green-100 text-green-800',
+    'property-tax': 'bg-purple-100 text-purple-800',
+    mortgage: 'bg-indigo-100 text-indigo-800',
+    cleaning: 'bg-teal-100 text-teal-800',
+    other: 'bg-gray-100 text-gray-800',
   };
+  return colors[category] || colors.other;
+};
 
-  const SortHeader = ({ label, sortKey }) => (
+// Receipt Modal Component
+function ReceiptModal({ receipt, onClose }) {
+  if (!receipt) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full z-10 bg-white"
+          aria-label="Close"
+        >
+          <FiX size={24} />
+        </button>
+        {receipt.endsWith('.pdf') || receipt.includes('application/pdf') ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-600 mb-4">PDF Receipt Preview</p>
+            <a
+              href={receipt}
+              download="receipt.pdf"
+              className="btn-primary inline-block"
+            >
+              Download PDF
+            </a>
+          </div>
+        ) : (
+          <img
+            src={receipt}
+            alt="Receipt"
+            className="w-full h-auto"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// SortHeader Component
+function SortHeader({ label, sortKey, sortConfig, handleSort }) {
+  return (
     <th
       onClick={() => handleSort(sortKey)}
       className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
@@ -55,70 +71,20 @@ function ExpenseTable({ expenses, onDelete }) {
       </div>
     </th>
   );
+}
 
-  // Category color mapping
-  const getCategoryColor = (category) => {
-    const colors = {
-      maintenance: 'bg-blue-100 text-blue-800',
-      repair: 'bg-red-100 text-red-800',
-      utilities: 'bg-yellow-100 text-yellow-800',
-      insurance: 'bg-green-100 text-green-800',
-      'property-tax': 'bg-purple-100 text-purple-800',
-      mortgage: 'bg-indigo-100 text-indigo-800',
-      cleaning: 'bg-teal-100 text-teal-800',
-      other: 'bg-gray-100 text-gray-800',
-    };
-    return colors[category] || colors.other;
-  };
-
-  // Receipt Modal
-  const ReceiptModal = ({ receipt, onClose }) => {
-    if (!receipt) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-auto relative">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full z-10 bg-white"
-            aria-label="Close"
-          >
-            <FiX size={24} />
-          </button>
-          {receipt.endsWith('.pdf') || receipt.includes('application/pdf') ? (
-            <div className="p-8 text-center">
-              <p className="text-gray-600 mb-4">PDF Receipt Preview</p>
-              <a
-                href={receipt}
-                download="receipt.pdf"
-                className="btn-primary inline-block"
-              >
-                Download PDF
-              </a>
-            </div>
-          ) : (
-            <img
-              src={receipt}
-              alt="Receipt"
-              className="w-full h-auto"
-            />
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  // Desktop view
-  const DesktopTable = () => (
+// Desktop Table Component
+function DesktopTable({ sortedExpenses, sortConfig, handleSort, onDelete, setSelectedReceipt }) {
+  return (
     <div className="overflow-x-auto hidden md:block">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50 sticky top-0">
           <tr>
-            <SortHeader label="Date" sortKey="date" />
-            <SortHeader label="Property" sortKey="property" />
-            <SortHeader label="Provider" sortKey="provider" />
-            <SortHeader label="Category" sortKey="category" />
-            <SortHeader label="Amount" sortKey="amount" />
+            <SortHeader label="Date" sortKey="date" sortConfig={sortConfig} handleSort={handleSort} />
+            <SortHeader label="Property" sortKey="property" sortConfig={sortConfig} handleSort={handleSort} />
+            <SortHeader label="Provider" sortKey="provider" sortConfig={sortConfig} handleSort={handleSort} />
+            <SortHeader label="Category" sortKey="category" sortConfig={sortConfig} handleSort={handleSort} />
+            <SortHeader label="Amount" sortKey="amount" sortConfig={sortConfig} handleSort={handleSort} />
             <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
               Receipt
             </th>
@@ -192,9 +158,11 @@ function ExpenseTable({ expenses, onDelete }) {
       </table>
     </div>
   );
+}
 
-  // Mobile view - Card layout
-  const MobileCards = () => (
+// Mobile Cards Component
+function MobileCards({ sortedExpenses, onDelete, setSelectedReceipt }) {
+  return (
     <div className="md:hidden space-y-4">
       {sortedExpenses.map((expense) => (
         <div
@@ -285,11 +253,61 @@ function ExpenseTable({ expenses, onDelete }) {
       ))}
     </div>
   );
+}
+
+// Main ExpenseTable Component
+function ExpenseTable({ expenses, onDelete }) {
+  const [sortConfig, setSortConfig] = useState({
+    key: 'date',
+    direction: 'desc',
+  });
+
+  const [selectedReceipt, setSelectedReceipt] = useState(null);
+
+  const sortedExpenses = [...expenses].sort((a, b) => {
+    const aVal = a[sortConfig.key];
+    const bVal = b[sortConfig.key];
+
+    if (typeof aVal === 'number') {
+      return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal;
+    }
+
+    if (sortConfig.key === 'date') {
+      const aDate = new Date(aVal);
+      const bDate = new Date(bVal);
+      return sortConfig.direction === 'asc' ? aDate - bDate : bDate - aDate;
+    }
+
+    const aStr = String(aVal).toLowerCase();
+    const bStr = String(bVal).toLowerCase();
+
+    return sortConfig.direction === 'asc'
+      ? aStr.localeCompare(bStr)
+      : bStr.localeCompare(aStr);
+  });
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction:
+        prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  };
 
   return (
     <div>
-      <DesktopTable />
-      <MobileCards />
+      <DesktopTable
+        sortedExpenses={sortedExpenses}
+        sortConfig={sortConfig}
+        handleSort={handleSort}
+        onDelete={onDelete}
+        setSelectedReceipt={setSelectedReceipt}
+      />
+      <MobileCards
+        sortedExpenses={sortedExpenses}
+        onDelete={onDelete}
+        setSelectedReceipt={setSelectedReceipt}
+      />
       <ReceiptModal
         receipt={selectedReceipt}
         onClose={() => setSelectedReceipt(null)}

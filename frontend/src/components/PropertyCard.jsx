@@ -13,10 +13,10 @@ function PropertyCard({ property, onEdit, onDelete }) {
     <div className="card">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">{property.name}</h3>
+          <h3 className="text-lg font-semibold text-gray-900">{property.address}</h3>
           <div className="flex items-center gap-1 text-gray-600 mt-1">
             <FiMapPin size={16} />
-            <span className="text-sm">{property.address}</span>
+            <span className="text-sm">{property.city}, {property.state}</span>
           </div>
         </div>
         {(onEdit || onDelete) && (
@@ -44,9 +44,9 @@ function PropertyCard({ property, onEdit, onDelete }) {
       </div>
 
       <div className="space-y-2 text-sm text-gray-600">
-        {property.city && <p>📍 {property.city}, {property.state}</p>}
-        {property.zipCode && <p>Zip: {property.zipCode}</p>}
-        {property.type && <p>Type: {property.type}</p>}
+        {property.zip_code && <p>📍 Zip: {property.zip_code}</p>}
+        {property.property_type && <p>Type: {property.property_type}</p>}
+        {property.created_at && <p className="text-xs text-gray-500">Added: {new Date(property.created_at).toLocaleDateString()}</p>}
       </div>
 
       {property.notes && (
