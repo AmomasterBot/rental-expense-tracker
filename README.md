@@ -61,7 +61,7 @@ rental-expense-tracker/
    
    Edit `.env` if needed (defaults are production-ready):
    ```env
-   PORT=5000
+   PORT=3001
    NODE_ENV=development
    DATABASE_PATH=./database.sqlite
    MAX_FILE_SIZE=10485760
@@ -79,7 +79,7 @@ rental-expense-tracker/
    npm run dev
    ```
 
-The API will be available at `http://localhost:5000`
+The API will be available at `http://localhost:3001`
 
 ## 📡 API Endpoints
 
@@ -111,7 +111,7 @@ The API will be available at `http://localhost:5000`
 
 ### Create a Property
 ```bash
-curl -X POST http://localhost:5000/api/properties \
+curl -X POST http://localhost:3001/api/properties \
   -H "Content-Type: application/json" \
   -d '{
     "address": "123 Main St",
@@ -126,7 +126,7 @@ curl -X POST http://localhost:5000/api/properties \
 
 ### Create an Expense
 ```bash
-curl -X POST http://localhost:5000/api/expenses \
+curl -X POST http://localhost:3001/api/expenses \
   -H "Content-Type: application/json" \
   -d '{
     "property_id": 1,
@@ -140,19 +140,19 @@ curl -X POST http://localhost:5000/api/expenses \
 
 ### Upload a Receipt
 ```bash
-curl -X POST http://localhost:5000/api/upload \
+curl -X POST http://localhost:3001/api/upload \
   -F "file=@receipt.heic" \
   -F "expense_id=1"
 ```
 
 ### List Expenses for a Property
 ```bash
-curl http://localhost:5000/api/expenses/property/1
+curl http://localhost:3001/api/expenses/property/1
 ```
 
 ### Filter Expenses by Date Range
 ```bash
-curl "http://localhost:5000/api/expenses?property_id=1&start_date=2024-01-01&end_date=2024-12-31"
+curl "http://localhost:3001/api/expenses?property_id=1&start_date=2024-01-01&end_date=2024-12-31"
 ```
 
 ## 💾 Database Schema
