@@ -8,8 +8,13 @@ const { db } = require('../config/database');
 // POST /api/upload - Upload a file
 router.post(
   '/',
-  upload.single('file'),
-  handleMulterError,
+  (req, res, next) => {
+    upload.single('file')(req, res, (err) => {
+      handleMulterError(err, req, res, () => {
+        next();
+      });
+    });
+  },
   convertHeicToJpeg,
   async (req, res) => {
     try {
