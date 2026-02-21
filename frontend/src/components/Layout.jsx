@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import InstallBanner from './InstallBanner';
 
 function Layout({ children, isOnline }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,6 +13,7 @@ function Layout({ children, isOnline }) {
         isOnline={isOnline} 
         onMenuClick={() => setSidebarOpen(!sidebarOpen)} 
       />
+      <InstallBanner />
       <div className="layout-wrapper">
         <Sidebar 
           isOpen={sidebarOpen} 

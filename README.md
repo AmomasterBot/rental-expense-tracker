@@ -61,7 +61,7 @@ rental-expense-tracker/
    
    Edit `.env` if needed (defaults are production-ready):
    ```env
-   PORT=5000
+   PORT=3001
    NODE_ENV=development
    DATABASE_PATH=./database.sqlite
    MAX_FILE_SIZE=10485760
@@ -79,7 +79,7 @@ rental-expense-tracker/
    npm run dev
    ```
 
-The API will be available at `http://localhost:5000`
+The API will be available at `http://localhost:3001`
 
 ## 📡 API Endpoints
 
@@ -101,17 +101,20 @@ The API will be available at `http://localhost:5000`
 - `DELETE /api/expenses/:id` — Delete expense
 - `GET /api/expenses/property/:property_id` — Get all expenses for a property with summary
 
-### Files
+### Files (US-2: Receipt Upload)
 - `POST /api/upload` — Upload a receipt file (JPEG, PNG, HEIC, PDF)
 - `GET /api/files` — List all files (supports filtering by expense_id)
 - `GET /api/files/:id` — Download a file
 - `DELETE /api/files/:id` — Delete a file
 
+### Property Expenses (US-3: Expense CRUD)
+- `GET /api/properties/:id/expenses` — Get all expenses for a specific property with summary
+
 ## 📝 API Usage Examples
 
 ### Create a Property
 ```bash
-curl -X POST http://localhost:5000/api/properties \
+curl -X POST http://localhost:3001/api/properties \
   -H "Content-Type: application/json" \
   -d '{
     "address": "123 Main St",
@@ -126,7 +129,7 @@ curl -X POST http://localhost:5000/api/properties \
 
 ### Create an Expense
 ```bash
-curl -X POST http://localhost:5000/api/expenses \
+curl -X POST http://localhost:3001/api/expenses \
   -H "Content-Type: application/json" \
   -d '{
     "property_id": 1,
@@ -140,20 +143,186 @@ curl -X POST http://localhost:5000/api/expenses \
 
 ### Upload a Receipt
 ```bash
-curl -X POST http://localhost:5000/api/upload \
+curl -X POST http://localhost:3001/api/upload \
   -F "file=@receipt.heic" \
   -F "expense_id=1"
 ```
 
 ### List Expenses for a Property
 ```bash
-curl http://localhost:5000/api/expenses/property/1
+curl http://localhost:3001/api/expenses/property/1
 ```
 
 ### Filter Expenses by Date Range
 ```bash
-curl "http://localhost:5000/api/expenses?property_id=1&start_date=2024-01-01&end_date=2024-12-31"
+curl "http://localhost:3001/api/expenses?property_id=1&start_date=2024-01-01&end_date=2024-12-31"
 ```
+
+### Get Expenses for a Specific Property (with summary)
+```bash
+curl http://localhost:3001/api/properties/1/expenses
+```
+
+Response includes:
+```json
+{
+  "property_id": 1,
+  "property_address": "123 Main St",
+  "expense_count": 5,
+  "total_expenses": 3500.00,
+  "expenses": [
+    {
+      "id": 1,
+      "property_id": 1,
+      "category": "Maintenance",
+      "description": "Roof repair",
+      "amount": 1500.00,
+      "expense_date": "2024-02-15",
+      "receipt_file_id": 1,
+      "notes": "Fixed roof leak",
+      "created_at": "2024-02-15 10:30:00",
+      "updated_at": "2024-02-15 10:30:00"
+    }
+  ],
+  "category_summary": [
+    {
+      "category": "Maintenance",
+      "count": 2,
+      "total": 2000.00
+    }
+  ]
+}
+```
+
+## 📤 File Upload (US-2)
+
+### Features
+- Accepts: **JPEG, PNG, HEIC, PDF** files
+- Max file size: **10 MB** per file
+- Automatic **HEIC → JPEG** conversion using Sharp
+- Secure file storage with unique filenames
+- File metadata stored in database
+- Proper error handling with HTTP status codes
+
+### Upload a Receipt
+```bash
+# Upload a single file
+curl -X POST http://localhost:3001/api/upload \
+  -F "file=@receipt.jpg"
+
+# Upload and link to an expense
+curl -X POST http://localhost:3001/api/upload \
+  -F "file=@receipt.heic" \
+  -F "expense_id=1"
+```
+
+### Upload Response
+```json
+{
+  "message": "File uploaded successfully",
+  "file": {
+    "id": 5,
+    "original_filename": "receipt.heic",
+    "stored_filename": "1708084800000-123456789.jpg",
+    "file_size": 245678,
+    "mime_type": "image/jpeg"
+  }
+}
+```
+
+### Supported File Types
+| Type | MIME Type | Auto-Convert |
+|------|-----------|--------------|
+| JPEG | image/jpeg | ✗ |
+| PNG | image/png | ✗ |
+| HEIC | image/heic | ✓ (→ JPEG) |
+| PDF | application/pdf | ✗ |
+
+### Error Codes
+- `400` — Invalid file type (only JPEG, PNG, HEIC, PDF allowed)
+- `413` — File size exceeds 10 MB limit
+- `500` — Server error during conversion
+
+### Configuration
+Adjust in `.env`:
+```env
+MAX_FILE_SIZE=10485760        # 10 MB in bytes
+UPLOAD_DIR=./uploads           # Directory to store files
+ENABLE_HEIC_CONVERSION=true    # Enable HEIC→JPEG conversion
+```
+
+## 💰 Expense Management (US-3)
+
+### Create Expense with File Attachment
+```bash
+curl -X POST http://localhost:3001/api/expenses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "property_id": 1,
+    "category": "Maintenance",
+    "description": "Roof repair",
+    "amount": 1500.00,
+    "expense_date": "2024-02-15",
+    "receipt_file_id": 5,
+    "notes": "Fixed roof leak"
+  }'
+```
+
+### Filter Expenses
+```bash
+# By property
+curl "http://localhost:3001/api/expenses?property_id=1"
+
+# By category
+curl "http://localhost:3001/api/expenses?category=Maintenance"
+
+# By date range
+curl "http://localhost:3001/api/expenses?start_date=2024-01-01&end_date=2024-12-31"
+
+# Multiple filters (AND logic)
+curl "http://localhost:3001/api/expenses?property_id=1&category=Maintenance&start_date=2024-01-01"
+```
+
+### Update Expense
+```bash
+curl -X PUT http://localhost:3001/api/expenses/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "property_id": 1,
+    "category": "Insurance",
+    "amount": 2000.00,
+    "expense_date": "2024-02-15"
+  }'
+```
+
+### Delete Expense
+```bash
+curl -X DELETE http://localhost:3001/api/expenses/1
+```
+
+### Required Fields for Expenses
+- `property_id` — Must reference an existing property
+- `category` — See categories table for valid options
+- `amount` — Numeric value (in dollars)
+- `expense_date` — ISO date format (YYYY-MM-DD)
+
+### Optional Fields
+- `description` — Short description of expense
+- `receipt_file_id` — ID of uploaded file (from `POST /api/upload`)
+- `notes` — Additional notes or comments
+
+### Category Validation
+The following categories are pre-loaded:
+- Mortgage/Rent
+- Property Tax
+- Insurance
+- Maintenance
+- Utilities
+- Management Fees
+- HOA Fees
+- Advertising
+- Legal/Professional
+- Supplies
 
 ## 💾 Database Schema
 
