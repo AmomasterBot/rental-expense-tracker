@@ -1,0 +1,21 @@
+
+> frontend@0.0.0 build
+> node scripts/generate-icons.js && vite build
+
+🎨 Generating PWA icons...
+
+✅ Created icon-192.png (192x192)
+✅ Created icon-512.png (512x512)
+✅ Created icon-192-maskable.png (192x192)
+✅ Created icon-512-maskable.png (512x512)
+
+✅ All PWA icons generated successfully!
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 61 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   1.21 kB │ gzip:  0.53 kB
+dist/assets/index-B8uwoBH0.css   33.33 kB │ gzip:  6.67 kB
+dist/assets/index-Qd2U99uW.js   284.99 kB │ gzip: 86.44 kB
+✓ built in 550ms

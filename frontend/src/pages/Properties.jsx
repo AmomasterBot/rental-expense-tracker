@@ -10,7 +10,7 @@ function Properties() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   // Fetch properties from API
   const fetchProperties = async () => {
