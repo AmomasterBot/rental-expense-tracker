@@ -10,7 +10,21 @@ function Properties() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  // Auto-detect backend URL based on current hostname
+  // This allows the app to work on localhost, LAN IP, and Tailscale IP
+  const getApiBaseUrl = () => {
+    // Check if custom URL is set in environment
+    if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:3001') {
+      return import.meta.env.VITE_API_URL;
+    }
+    
+    // Auto-detect: use same host as frontend, port 3001
+    const host = window.location.hostname;
+    const port = 3001;
+    return `http://${host}:${port}`;
+  };
+
+  const API_BASE_URL = getApiBaseUrl();
 
   // Fetch properties from API
   const fetchProperties = async () => {
