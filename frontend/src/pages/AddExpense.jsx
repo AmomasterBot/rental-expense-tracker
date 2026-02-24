@@ -6,10 +6,43 @@ import ExpenseForm from '../components/ExpenseForm';
 function AddExpense() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Auto-detect backend URL based on current hostname
+  // This allows the app to work on localhost, LAN IP, and Tailscale IP
+  const getApiBaseUrl = () => {
+    // Check if custom URL is set in environment
+    if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:3001') {
+      return import.meta.env.VITE_API_URL;
+    }
+    
+    // Auto-detect: use same host as frontend, port 3001
+    const host = window.location.hostname;
+    const port = 3001;
+    return `http://${host}:${port}`;
+  };
+
+  const API_BASE_URL = getApiBaseUrl();
 
   useEffect(() => {
-    const storedProperties = JSON.parse(localStorage.getItem('properties')) || [];
-    setProperties(storedProperties);
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/properties`);
+        if (!response.ok) throw new Error('Failed to fetch properties');
+        const data = await response.json();
+        setProperties(data.properties || []);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+        setError(error.message);
+        setProperties([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProperties();
   }, []);
 
   const handleSaveExpense = (expense) => {
@@ -45,8 +78,25 @@ function AddExpense() {
       </div>
 
       <div className="max-w-2xl">
+        {/* Error Message */}
+        {error && (
+          <div className="card bg-red-50 border border-red-200 mb-4">
+            <p className="text-red-800">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 text-red-600 underline hover:text-red-800"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
         <div className="card">
-          {properties.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Loading properties...</p>
+            </div>
+          ) : properties.length > 0 ? (
             <ExpenseForm
               properties={properties}
               onSave={handleSaveExpense}
