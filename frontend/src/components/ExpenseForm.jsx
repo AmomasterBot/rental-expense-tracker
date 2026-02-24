@@ -249,7 +249,7 @@ function ExpenseForm({ properties = [], onSave, onCancel }) {
             <option value="">Select a property...</option>
             {properties.map((prop) => (
               <option key={prop.id} value={prop.id}>
-                {prop.name}
+                {prop.address}, {prop.city}, {prop.state} {prop.zip_code}
               </option>
             ))}
           </select>
