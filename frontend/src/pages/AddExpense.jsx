@@ -6,26 +6,49 @@ import ExpenseForm from '../components/ExpenseForm';
 function AddExpense() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
   useEffect(() => {
-    const storedProperties = JSON.parse(localStorage.getItem('properties')) || [];
-    setProperties(storedProperties);
+    // Fetch properties from API
+    const fetchProperties = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/properties`);
+        if (!response.ok) throw new Error('Failed to fetch properties');
+        const data = await response.json();
+        setProperties(data.properties || []);
+      } catch (err) {
+        console.error('Error fetching properties:', err);
+        // Fallback to localStorage if API fails
+        const storedProperties = JSON.parse(localStorage.getItem('properties')) || [];
+        setProperties(storedProperties);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProperties();
   }, []);
 
-  const handleSaveExpense = (expense) => {
-    const storedExpenses = JSON.parse(localStorage.getItem('expenses')) || [];
-    const newExpense = {
-      ...expense,
-      id: Date.now(),
-      createdAt: new Date().toISOString(),
-    };
-
-    storedExpenses.push(newExpense);
-    localStorage.setItem('expenses', JSON.stringify(storedExpenses));
-
-    // Show success message
-    alert('Expense added successfully!');
-    navigate('/expenses');
+  const handleSaveExpense = async (expense) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/expenses`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(expense)
+      });
+      
+      if (!response.ok) throw new Error('Failed to create expense');
+      
+      // Show success message
+      alert('Expense added successfully!');
+      navigate('/expenses');
+    } catch (err) {
+      console.error('Error saving expense:', err);
+      alert('Failed to add expense. Please try again.');
+    }
   };
 
   return (
@@ -46,7 +69,11 @@ function AddExpense() {
 
       <div className="max-w-2xl">
         <div className="card">
-          {properties.length > 0 ? (
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Loading properties...</p>
+            </div>
+          ) : properties.length > 0 ? (
             <ExpenseForm
               properties={properties}
               onSave={handleSaveExpense}
