@@ -52,8 +52,8 @@ async function startServer() {
     console.log('Initializing database...');
     await initializeDatabase();
     
-    app.listen(PORT, () => {
-      console.log(`✓ Rental Expense Tracker API running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✓ Rental Expense Tracker API running on http://0.0.0.0:${PORT}`);
       console.log(`✓ Database initialized`);
       console.log(`✓ Available endpoints:`);
       console.log(`  - GET  /health`);
