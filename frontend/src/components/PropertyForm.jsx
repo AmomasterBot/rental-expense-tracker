@@ -2,18 +2,24 @@ import React, { useState, useEffect } from 'react';
 
 function PropertyForm({ onSave, onCancel, property }) {
   const [formData, setFormData] = useState({
-    name: '',
     address: '',
     city: '',
     state: '',
-    zipCode: '',
-    type: 'apartment',
+    zip_code: '',
+    property_type: 'apartment',
     notes: '',
   });
 
   useEffect(() => {
     if (property) {
-      setFormData(property);
+      setFormData({
+        address: property.address || '',
+        city: property.city || '',
+        state: property.state || '',
+        zip_code: property.zip_code || '',
+        property_type: property.property_type || 'apartment',
+        notes: property.notes || '',
+      });
     }
   }, [property]);
 
@@ -24,37 +30,23 @@ function PropertyForm({ onSave, onCancel, property }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.address) {
-      alert('Please fill in required fields');
+    if (!formData.address || !formData.city || !formData.state || !formData.zip_code) {
+      alert('Please fill in all required fields: address, city, state, and zip code');
       return;
     }
     onSave(formData);
     setFormData({
-      name: '',
       address: '',
       city: '',
       state: '',
-      zipCode: '',
-      type: 'apartment',
+      zip_code: '',
+      property_type: 'apartment',
       notes: '',
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="label">Property Name *</label>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="e.g., Downtown Apartment"
-          className="input-field"
-          required
-        />
-      </div>
-
       <div>
         <label className="label">Address *</label>
         <input
@@ -70,7 +62,7 @@ function PropertyForm({ onSave, onCancel, property }) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="label">City</label>
+          <label className="label">City *</label>
           <input
             type="text"
             name="city"
@@ -78,10 +70,11 @@ function PropertyForm({ onSave, onCancel, property }) {
             onChange={handleChange}
             placeholder="City"
             className="input-field"
+            required
           />
         </div>
         <div>
-          <label className="label">State</label>
+          <label className="label">State *</label>
           <input
             type="text"
             name="state"
@@ -89,33 +82,36 @@ function PropertyForm({ onSave, onCancel, property }) {
             onChange={handleChange}
             placeholder="State"
             className="input-field"
+            required
           />
         </div>
       </div>
 
       <div>
-        <label className="label">Zip Code</label>
+        <label className="label">Zip Code *</label>
         <input
           type="text"
-          name="zipCode"
-          value={formData.zipCode}
+          name="zip_code"
+          value={formData.zip_code}
           onChange={handleChange}
           placeholder="Zip Code"
           className="input-field"
+          required
         />
       </div>
 
       <div>
         <label className="label">Property Type</label>
         <select
-          name="type"
-          value={formData.type}
+          name="property_type"
+          value={formData.property_type}
           onChange={handleChange}
           className="input-field"
         >
           <option value="apartment">Apartment</option>
           <option value="house">House</option>
           <option value="condo">Condo</option>
+          <option value="commercial">Commercial</option>
           <option value="townhouse">Townhouse</option>
           <option value="other">Other</option>
         </select>

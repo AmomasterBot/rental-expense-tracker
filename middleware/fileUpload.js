@@ -91,8 +91,15 @@ async function convertHeicToJpeg(req, res, next) {
 // Error handling middleware for multer
 function handleMulterError(err, req, res, next) {
   if (err instanceof multer.MulterError) {
-    if (err.code === 'FILE_TOO_LARGE') {
-      return res.status(400).json({ error: 'File size exceeds maximum limit of 10MB' });
+    // Multer error codes: LIMIT_FILE_SIZE, FILE_TOO_LARGE (different versions)
+    if (err.code === 'FILE_TOO_LARGE' || err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(413).json({ error: 'File size exceeds maximum limit of 10MB' });
+    }
+    if (err.code === 'LIMIT_PART_COUNT') {
+      return res.status(400).json({ error: 'Too many parts' });
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({ error: 'Too many files' });
     }
     return res.status(400).json({ error: err.message });
   } else if (err) {

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Property = require('../models/Property');
+const Expense = require('../models/Expense');
 
 // POST /api/properties - Create a new property
 router.post('/', async (req, res) => {
@@ -112,6 +113,30 @@ router.delete('/:id', async (req, res) => {
     res.status(200).json({
       message: 'Property deleted successfully',
       ...result
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/properties/:id/expenses - Get expenses for a specific property with summary
+router.get('/:id/expenses', async (req, res) => {
+  try {
+    const property = await Property.getById(req.params.id);
+    if (!property) {
+      return res.status(404).json({ error: 'Property not found' });
+    }
+
+    const expenses = await Expense.getByPropertyId(req.params.id);
+    const categorySums = await Expense.getCategorySum(req.params.id);
+
+    res.status(200).json({
+      property_id: req.params.id,
+      property_address: property.address,
+      expense_count: expenses.length,
+      total_expenses: expenses.reduce((sum, e) => sum + e.amount, 0),
+      expenses,
+      category_summary: categorySums
     });
   } catch (error) {
     res.status(500).json({ error: error.message });

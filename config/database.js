@@ -16,6 +16,14 @@ const db = new sqlite3.Database(dbPath, (err) => {
     console.error('Error opening database:', err);
   } else {
     console.log('Connected to SQLite database at:', dbPath);
+    // Enable foreign key constraints for cascading deletes
+    db.run('PRAGMA foreign_keys = ON', (err) => {
+      if (err) {
+        console.error('Error enabling foreign keys:', err);
+      } else {
+        console.log('Foreign key constraints enabled');
+      }
+    });
   }
 });
 

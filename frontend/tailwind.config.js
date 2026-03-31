@@ -15,25 +15,16 @@ export default {
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
+        'slide-down': 'slideDown 0.3s ease-in-out',
       },
       keyframes: {
         fadeIn: {
-          'from': {
-            opacity: '0',
-          },
-          'to': {
-            opacity: '1',
-          },
+          from: { opacity: '0' },
+          to: { opacity: '1' },
         },
         slideDown: {
-          'from': {
-            transform: 'translateY(-100%)',
-            opacity: '0',
-          },
-          'to': {
-            transform: 'translateY(0)',
-            opacity: '1',
-          },
+          from: { transform: 'translateY(-100%)', opacity: '0' },
+          to: { transform: 'translateY(0)', opacity: '1' },
         },
       },
     },

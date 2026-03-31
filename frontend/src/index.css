@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   * {
@@ -108,7 +106,7 @@
   }
 
   .main-content::-webkit-scrollbar {
-    @apply w-2;
+    width: 8px;
   }
 
   .main-content::-webkit-scrollbar-track {
@@ -124,30 +122,24 @@
   }
 }
 
-@layer utilities {
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+/* Global animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
-
-  @keyframes slideDown {
-    from {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  to {
+    opacity: 1;
   }
+}
 
-  .animate-fade-in {
-    @apply animation-fadeIn;
-    animation: fadeIn 0.3s ease-in-out;
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
